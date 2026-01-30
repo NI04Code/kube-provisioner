@@ -95,3 +95,30 @@ resource "aws_security_group" "kube-sg" {
     Name = "kube-sg"
   }
 }
+
+resource "aws_instance" "control-node" {
+  ami                    = "${data.aws_ami.ubuntu_24_04.id}"
+  instance_type          = "t3.medium"
+
+  key_name               = locals.key_name
+  vpc_security_group_ids = [aws_security_group.kube_sg.id]
+  root_block_device {
+    volume_size           = 20   
+    volume_type           = "gp3" 
+    delete_on_termination = true 
+  }
+}
+
+resource "aws_instance" "worker-node" {
+  count                  = locals.worker_node_amount
+  ami                    = "${data.aws_ami.ubuntu_24_04.id}"
+  instance_type          = "t3.small"
+
+  key_name               = locals.key_name
+  vpc_security_group_ids = [aws_security_group.kube_sg.id]
+  root_block_device {
+    volume_size           = 20   
+    volume_type           = "gp3" 
+    delete_on_termination = true 
+  }
+}
